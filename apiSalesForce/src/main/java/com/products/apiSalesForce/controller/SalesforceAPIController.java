@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.products.apiSalesForce.model.AuthenticationResponse;
-import com.products.apiSalesForce.model.Inventory;
 import com.products.apiSalesForce.service.SalesforceAPIService;
 
 
@@ -22,14 +21,14 @@ public class SalesforceAPIController {
 	@Autowired
 	private SalesforceAPIService salesforceAPIService;
 	
-	@RequestMapping("/inventory")
-	public Inventory getSalesforceObject() {
-		AuthenticationResponse authenticationResponse = salesforceAPIService.login();
-		Inventory response = salesforceAPIService.getAccountData(authenticationResponse.getAccess_token(),
-				authenticationResponse.getInstance_url());
-
-		return response;
-	}
+//	@RequestMapping("/inventory")
+//	public Inventory getSalesforceObject() {
+//		AuthenticationResponse authenticationResponse = salesforceAPIService.login();
+//		Inventory response = salesforceAPIService.getAccountData(authenticationResponse.getAccess_token(),
+//				authenticationResponse.getInstance_url());
+//
+//		return response;
+//	}
 	
 	@RequestMapping("/getAll")
 	public Object getInventoryList() {
@@ -58,12 +57,12 @@ public class SalesforceAPIController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@RequestMapping(method = RequestMethod.PUT, value = "/updateItem")
-	public HttpEntity<Void> updateInventoryItem(@RequestBody String payload, @RequestBody String id) {
+	@RequestMapping(method = RequestMethod.PATCH, value = "/updateItem")
+	public HttpEntity<Void> updateInventoryItem(@RequestBody Map<String,String> payload) {
 		AuthenticationResponse authenticationResponse = salesforceAPIService.login();
 		
 		salesforceAPIService.updateInventoryItem(authenticationResponse.getAccess_token(),
-				authenticationResponse.getInstance_url(), payload, id);
+				authenticationResponse.getInstance_url(), payload);
 		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}

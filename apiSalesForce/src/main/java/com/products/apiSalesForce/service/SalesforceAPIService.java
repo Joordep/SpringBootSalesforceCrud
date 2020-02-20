@@ -1,6 +1,7 @@
 package com.products.apiSalesForce.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,11 +13,16 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.products.apiSalesForce.model.AuthenticationResponse;
 import com.products.apiSalesForce.model.Inventory;
 
 @Component
 public class SalesforceAPIService {
+
+	private static final String QUERY_INVENTORY = "/services/data/v25.0/query?q=select+Id,name, price__c,Quantity__c,description__c+from+Inventory__c";
+	private static final String CREATE_UPDATE_REMOVE_INVENTORY_ITEM = "/services/data/v25.0/sobjects/Inventory__c/";
 
 	public AuthenticationResponse login() {
 		HttpHeaders headers = new HttpHeaders();
@@ -40,64 +46,83 @@ public class SalesforceAPIService {
 		return (AuthenticationResponse) response.getBody();
 	}
 
-	public Inventory getAccountData(String accessToken, String instanceUrl) {
+//	public Inventory getAccountData(String accessToken, String instanceUrl) {
+//		HttpHeaders headers = getHeaders(accessToken);
+//		
+//		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+//
+//		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
+//				headers);
+//		RestTemplate restTemplate = new RestTemplate();
+//		@SuppressWarnings("rawtypes")
+//		ResponseEntity salesforceTestData = restTemplate.exchange(
+//				instanceUrl + "/services/data/v25.0/sobjects/Inventory__c/a016g00000HL83fAAD", HttpMethod.GET, request,
+//				Inventory.class);
+//		return (Inventory) salesforceTestData.getBody();
+//	}
+
+	private HttpHeaders getHeaders(String accessToken) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 		headers.set("Authorization", "Bearer " + accessToken);
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
-				headers);
-		RestTemplate restTemplate = new RestTemplate();
-		@SuppressWarnings("rawtypes")
-		ResponseEntity salesforceTestData = restTemplate.exchange(
-				instanceUrl + "/services/data/v25.0/sobjects/Inventory__c/a016g00000HL83fAAD", HttpMethod.GET, request,
-				Inventory.class);
-		return (Inventory) salesforceTestData.getBody();
+		return headers;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Object getInventoryList(String accessToken, String instanceUrl) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + accessToken);
+		HttpHeaders headers = getHeaders(accessToken);
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
 				headers);
 		RestTemplate restTemplate = new RestTemplate();
-		@SuppressWarnings("rawtypes")
-		ResponseEntity salesforceTestData = restTemplate.exchange(instanceUrl
-				+ "/services/data/v25.0/query?q=select+Id,name, price__c,Quantity__c,description__c+from+Inventory__c",
-				HttpMethod.GET, request, QueryResultInventory.class);
+
+		ResponseEntity salesforceTestData = restTemplate.exchange(instanceUrl + QUERY_INVENTORY, HttpMethod.GET,
+				request, QueryResultInventory.class);
 		return salesforceTestData.getBody();
 	}
 
 	public void removeInventoryItemById(String accessToken, String instanceUrl, String id) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + accessToken);
+		HttpHeaders headers = getHeaders(accessToken);
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
 				headers);
 		RestTemplate restTemplate = new RestTemplate();
 
-		restTemplate.exchange(instanceUrl + "/services/data/v25.0/sobjects/Inventory__c/" + id, HttpMethod.DELETE,
-				request, String.class);
+		restTemplate.exchange(instanceUrl + CREATE_UPDATE_REMOVE_INVENTORY_ITEM + id, HttpMethod.DELETE, request,
+				String.class);
 
 	}
-	
-	public void createInventoryItem(String accessToken, String instanceUrl, String payload) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + accessToken);
 
+	public void createInventoryItem(String accessToken, String instanceUrl, String payload) {
+		HttpHeaders headers = getHeaders(accessToken);
+		
 		HttpEntity<String> request = new HttpEntity<String>(payload, headers);
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.exchange(instanceUrl + "/services/data/v25.0/sobjects/Inventory__c/", HttpMethod.POST, request,
+		restTemplate.exchange(instanceUrl + CREATE_UPDATE_REMOVE_INVENTORY_ITEM, HttpMethod.POST, request,
 				Inventory.class);
 
+	}
+
+	public void updateInventoryItem(String accessToken, String instanceUrl, Map<String, String> payload) {
+		HttpHeaders headers = getHeaders(accessToken);
+
+		String itemId = payload.get("Id");
+		payload.remove("Id");
+
+		try {
+			String json = new ObjectMapper().writeValueAsString(payload);
+
+			HttpEntity<String> request = new HttpEntity<String>(json, headers);
+			RestTemplate restTemplate = new RestTemplate();
+
+			restTemplate.postForObject(
+					instanceUrl + CREATE_UPDATE_REMOVE_INVENTORY_ITEM + itemId + "?_HttpMethod=PATCH", request,
+					Inventory.class);
+
+		} catch (JsonProcessingException e) {
+			System.out.println(e);
+		}
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -108,19 +133,5 @@ public class SalesforceAPIService {
 
 	private static class QueryResultInventory extends QueryResult<Inventory> {
 	}
-
-	public void updateInventoryItem(String accessToken, String instanceUrl, String payload, String id) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + accessToken);
-
-		HttpEntity<String> request = new HttpEntity<String>(payload, headers);
-		RestTemplate restTemplate = new RestTemplate();
-		
-		restTemplate.exchange(instanceUrl + "/services/data/v25.0/sobjects/Inventory__c/"+ id, HttpMethod.PATCH, request,
-				Inventory.class);
-		
-	}
-
 
 }
