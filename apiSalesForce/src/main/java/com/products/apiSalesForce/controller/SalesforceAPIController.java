@@ -21,16 +21,7 @@ public class SalesforceAPIController {
 	@Autowired
 	private SalesforceAPIService salesforceAPIService;
 	
-//	@RequestMapping("/inventory")
-//	public Inventory getSalesforceObject() {
-//		AuthenticationResponse authenticationResponse = salesforceAPIService.login();
-//		Inventory response = salesforceAPIService.getAccountData(authenticationResponse.getAccess_token(),
-//				authenticationResponse.getInstance_url());
-//
-//		return response;
-//	}
-	
-	@RequestMapping("/getAll")
+	@RequestMapping("/getInventoryList")
 	public Object getInventoryList() {
 		AuthenticationResponse authenticationResponse = salesforceAPIService.login();
 		
@@ -38,8 +29,8 @@ public class SalesforceAPIController {
 				authenticationResponse.getInstance_url());		
 	}
 	
-	@RequestMapping(method = RequestMethod.DELETE, value = "/deleteById")
-	public HttpEntity<Void> createInventory(String id) {
+	@RequestMapping(method = RequestMethod.DELETE, value = "/deleteInventoryItemById")
+	public HttpEntity<Void> deleteInventoryItemById(String id) {
 		AuthenticationResponse authenticationResponse = salesforceAPIService.login();
 		salesforceAPIService.removeInventoryItemById(authenticationResponse.getAccess_token(),
 				authenticationResponse.getInstance_url(), id);
@@ -47,7 +38,7 @@ public class SalesforceAPIController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@RequestMapping(method = RequestMethod.POST, value = "/createNew")
+	@RequestMapping(method = RequestMethod.POST, value = "/createInventoryItem")
 	public HttpEntity<Void> createInventoryItem(@RequestBody String payload) {
 		AuthenticationResponse authenticationResponse = salesforceAPIService.login();
 		
@@ -57,7 +48,7 @@ public class SalesforceAPIController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@RequestMapping(method = RequestMethod.PATCH, value = "/updateItem")
+	@RequestMapping(method = RequestMethod.PATCH, value = "/updateInventoryItem")
 	public HttpEntity<Void> updateInventoryItem(@RequestBody Map<String,String> payload) {
 		AuthenticationResponse authenticationResponse = salesforceAPIService.login();
 		
