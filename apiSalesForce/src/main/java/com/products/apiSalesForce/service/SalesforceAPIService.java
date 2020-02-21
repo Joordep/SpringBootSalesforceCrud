@@ -46,21 +46,6 @@ public class SalesforceAPIService {
 		return (AuthenticationResponse) response.getBody();
 	}
 
-//	public Inventory getAccountData(String accessToken, String instanceUrl) {
-//		HttpHeaders headers = getHeaders(accessToken);
-//		
-//		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-//
-//		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(params,
-//				headers);
-//		RestTemplate restTemplate = new RestTemplate();
-//		@SuppressWarnings("rawtypes")
-//		ResponseEntity salesforceTestData = restTemplate.exchange(
-//				instanceUrl + "/services/data/v25.0/sobjects/Inventory__c/a016g00000HL83fAAD", HttpMethod.GET, request,
-//				Inventory.class);
-//		return (Inventory) salesforceTestData.getBody();
-//	}
-
 	private HttpHeaders getHeaders(String accessToken) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
