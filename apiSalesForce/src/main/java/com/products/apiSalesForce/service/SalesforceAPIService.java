@@ -29,8 +29,8 @@ public class SalesforceAPIService {
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 
-		params.add("username", " joao.martinez@pdcase.com.br");
-		params.add("password", " qW$wbs3DF-F6P3P");
+		params.add("username", " YOUR USERNAME");
+		params.add("password", " YOUR PASSWORD");
 		params.add("client_secret", "FDB37E782F3AA50796B5B01A5658EA63F7A47D442CFFDA0CB1FBD1287E60C252");
 		params.add("client_id",
 				"3MVG9LBJLApeX_PAJCQNs9iz_VT17k_AQPQuVVHD0xrlRjajSVhiyCYfTg9ZN0MJREVHLn3CQepPRK1yva2Z4");
